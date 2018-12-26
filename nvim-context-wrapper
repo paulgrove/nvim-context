@@ -1,0 +1,21 @@
+#!/bin/bash
+set -e
+BUILT_FLAG=/context-built
+cd /context
+if [ ! -f $BUILT_FLAG ]; then
+	echo "Configuring nvim..."
+	if [ -f /context-config/setup.sh ]; then
+		/bin/bash /context-config/setup.sh
+	fi
+	XDG_CONFIG_HOME="/context-src/.config" nvim +PlugInstall +qall
+	touch $BUILT_FLAG
+fi
+PS1='$ '
+source ~/.bashrc
+# this remaps localhost to a host alias (which should be setup hopefully!)
+cat /etc/hosts > /tmp/hosts
+perl -pi -e 's/127.0.0.1/172.16.123.1/g' /tmp/hosts
+cat /tmp/hosts > /etc/hosts
+
+# run nvim
+XDG_CONFIG_HOME="/context-src/.config" nvim

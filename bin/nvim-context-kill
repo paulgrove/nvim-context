@@ -1,0 +1,39 @@
+#!/bin/bash
+
+NVIM_CONTEXT=$(pwd)
+while [ ! -z "$NVIM_CONTEXT" ] && [ ! -d "$NVIM_CONTEXT/.nvim-context" ]; do
+    NVIM_CONTEXT="${NVIM_CONTEXT%\/*}"
+done
+NVIM_CONTEXT_CONFIG="$NVIM_CONTEXT/.nvim-context"
+if [ ! -d $NVIM_CONTEXT_CONFIG ]; then
+	echo "No .nvim-context found."
+	exit -1
+fi
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  NVIM_CONTEXT_BIN="$( cd -P "$( dirname "$SOURCE" )" >/dev/null && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$NVIM_CONTEXT_BIN/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+NVIM_CONTEXT_BIN="$( cd -P "$( dirname "$SOURCE" )" >/dev/null && pwd )"
+
+CONTEXT_NAME="nvim_context_$(echo $NVIM_CONTEXT | md5 | cut -c 1-10)"
+
+#docker ps -a | 
+DOCKER_STATUS=$(docker ps -a | grep $CONTEXT_NAME)
+
+if [[ $DOCKER_STATUS == *"Up"* ]]; then
+	# Container is already running
+	docker kill $CONTEXT_NAME
+	docker rm -v $CONTEXT_NAME
+	exit 0;
+fi
+
+if [[ $DOCKER_STATUS == *"Exited"* ]]; then
+	# Container is already created but stopped
+	docker rm -v $CONTEXT_NAME
+	exit 0;
+fi
+
+echo "No instance of the container $CONTEXT_NAME found."
