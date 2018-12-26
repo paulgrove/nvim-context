@@ -1,0 +1,9 @@
+{
+	"coc.preferences.autoTrigger": "always",
+	"coc.preferences.timeout": 2000,
+	"coc.preferences.triggerAfterInsertEnter": true,
+	"coc.preferences.triggerSignatureHelp":true,
+	"coc.preferences.echodocSupport": true,
+	"coc.preferences.minTriggerInputLength": 0,
+	"coc.preferences.diagnostic.displayByAle": true
+}
